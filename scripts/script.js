@@ -8,8 +8,12 @@ const gameBoard = (
             if (_board[cellNum] == '') {//don't update if cell has already been played
                 _board[cellNum] = mark;
                 displayController.render(_board);
-                displayController.changeState(name, _checkWin())
+                displayController.changeState(name, _checkWin(), _checkTie())
             }
+        }
+
+        const _checkTie = function () {
+            return _board.every((cell) => cell != '')
         }
 
         const _checkWin = function(){
@@ -74,8 +78,16 @@ const displayController = (
             })
         }
 
-        const changeState = function (player, win=false) {
-            _stateDisplay.innerText = win ? `${player} won` : `${player}'s turn.`
+        const changeState = function (player, win=false, tie=false) {
+            let text
+            if (win) {
+                text = `${player} won.` 
+            } else if(tie) {
+                text = `It's a tie!`
+            } else {
+            text = `${player}'s turn.`
+            }
+            _stateDisplay.innerText = text;
         }
         return {render, changeState}
     })();
