@@ -1,6 +1,10 @@
-# tic-tac-toe
+# Tic-tac-toe Game
 
 by Héctor Gonzalez Orozco
+
+Tic-tac-toe game app using vanilla javascript.
+
+I made it to practice organizing javascript code by using factory functions and modules.
 
 Build as part of The Odin Project curriculum.
 
