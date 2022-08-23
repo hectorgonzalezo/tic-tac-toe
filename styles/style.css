@@ -16,6 +16,11 @@ main {
 
 #state-display{
     flex: 1;
+    font-size: 3rem;
+    outline: solid red;
+    padding: 40px;
+    display: flex;
+    align-items: center;
 }
 
 #game-area {

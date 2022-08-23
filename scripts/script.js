@@ -1,15 +1,20 @@
 //module for gameboard
 const gameBoard = (
     function () {
-        const _board = new Array(9).fill('');
+        let _board = new Array(9).fill('');
+
+        const restart = function () {
+            _board = new Array(9).fill(''); 
+            displayController.render(_board)
+        }
 
         const update = function (cellNum, mark, name) {
             // console.log(mark)
             if (_board[cellNum] == '') {//don't update if cell has already been played
                 _board[cellNum] = mark;
                 displayController.render(_board);
-                displayController.changeState(name, _checkWin(), _checkTie())
-            }
+                displayController.changeStateDisplay(name, _checkWin(), _checkTie())
+            };
         }
 
         const _checkTie = function () {
@@ -53,7 +58,7 @@ const gameBoard = (
             return win  
         }
 
-        return { update }
+        return { update, restart }
     }
 )()
 
@@ -63,13 +68,25 @@ const displayController = (
         const _gameArea = document.querySelector('#game-area')
         const _gameSquares = Array.from(_gameArea.children);
         const _stateDisplay = document.querySelector('#state-display')
+        const _restartButton = document.querySelector('#restart-button')
         
         //add event listeners to squares to update when pressed by player
+        const activateCells = () => {
         _gameSquares.forEach(
-            (square, cellNum) => square.addEventListener('click', (e) => {
-                // gameBoard.update(cellNum, 'x');
-                game.turn(cellNum)
-            }))
+            (square) => square.addEventListener('click', _cellListenerFunc))
+        };
+
+        const _deactivateCells = () => {
+            _gameSquares.forEach(
+                (square) => square.removeEventListener('click', _cellListenerFunc))
+        }
+
+        const _cellListenerFunc = function(){
+            game.turn(this.getAttribute('data'))
+        }
+
+        //restart with button
+        _restartButton.addEventListener('click', () => game.restart());
         
         //updates DOM
         const render = function (board) {
@@ -78,18 +95,24 @@ const displayController = (
             })
         }
 
-        const changeState = function (player, win=false, tie=false) {
+        const changeStateDisplay = function (player, win=false, tie=false) {
             let text
+            //get the name of the other player to post whose turn is next
+            const nextPlayer = player1.getName() == player ? 
+            player2.getName() : 
+            player1.getName();
+
             if (win) {
                 text = `${player} won.` 
+                _deactivateCells();
             } else if(tie) {
                 text = `It's a tie!`
             } else {
-            text = `${player}'s turn.`
+            text = `${nextPlayer}'s turn.`
             }
             _stateDisplay.innerText = text;
         }
-        return {render, changeState}
+        return {render, changeStateDisplay, activateCells}
     })();
 
 //factory function to create a player
@@ -98,13 +121,24 @@ const Player = function (name, mark) {
 
     const addMark = function (cellNum) {//adds a mark on gameBoard
         gameBoard.update(cellNum, _mark, name);
-        // displayController.changeState(name)
     }
-    return {addMark}
+
+    const getName = function(){
+        return name
+    }
+
+    return {addMark, getName}
 }
 
+//manages the flow of the game.
 const game = (function () {
     let counter = 0;
+
+    const start = function(){
+        displayController.changeStateDisplay(player2.getName())
+        displayController.activateCells();
+    };
+
     const turn = function(cellNum) {
         //alternate turns between players
         if(counter%2 == 0){
@@ -117,15 +151,16 @@ const game = (function () {
 
     const restart = function() {
         counter = 0;
+        gameBoard.restart();
+        this.start();
     }
-    return{turn, restart}
+    return{start, turn, restart}
 }
 )()
 
-// gameBoard.render();
+
 
 let player1 = Player('Hector', '0');
 let player2 = Player('Juan', 'x')
 
-player1.addMark(1)
-player2.addMark(4)
+game.start()
