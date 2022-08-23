@@ -13,7 +13,7 @@
 
 <body>
 
-    <main>
+    <main class="inactive visible-area">
         <div id="game-area">
             <div data="0"></div>
             <div data="1"></div>
@@ -25,17 +25,27 @@
             <div data="7"></div>
             <div data="8"></div>
         </div>
-        <div>
+        <div id="display-area">
             <h2 id="state-display"></h2>
             <button id="restart-button">Restart</button>
         </div>
     </main>
-    <footer>
+    <footer class="inactive visible-area">
         <h2>Héctor González Orozco</h2>
-        <a href='https://github.com/hectorgonzalezo/library'>
+        <a href='https://github.com/hectorgonzalezo/tic-tac-toe'>
             <img src="./images/github-logo.png" alt="github logo" id="github-logo">
         </a>
     </footer>
+    <div id="pop-up">
+        <h1>Please enter player names:</h1>
+        <form action="" id="form-player-names">
+            <label for="player-1">Player 1:</label>
+            <input type="text" required>
+            <label for="player-2">Player 2:</label>
+            <input type="text" required>
+            <button id="pop-up-button">Start</button>
+        </form>
+    </div>
 </body>
 
 </html>

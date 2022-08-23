@@ -1,46 +1,131 @@
 @import url('./reset.css');
 
+:root {
+    --color-rock: #cecab4;
+    --color-light: #A3C9A8;
+    --color-dark: #50808E;
+    --color-medium: #69A297;
+    --color-complementary1-light:  rgb(244, 225, 186);
+    --color-complementary1-dark:  rgb(218, 163, 54);
+    --color-complementary2-light: rgb(255, 209, 255);
+    --color-complementary2-dark: rgb(184, 43, 184);
+}
+
+* {
+    outline: dashed red;
+}
+
 body {
     display: grid;
     height: 100vh;
     grid-template-rows: 10fr 1fr;
+    background-color: var(--color-rock);
 }
 
 main {
-    display:flex;
+    display: grid;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    flex-wrap: wrap;
+    grid-template-rows: 5fr 1fr;
 }
 
-#state-display{
-    flex: 1;
-    font-size: 3rem;
-    outline: solid red;
-    padding: 40px;
-    display: flex;
-    align-items: center;
+.inactive {
+    opacity: 0;
 }
 
 #game-area {
+    --gap-size: 15px;
     width: 500px;
     height: 500px;
-    background-color: blue;
+    background-color: var(--color-rock);
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
-    gap: 10px;
+    gap: var(--gap-size);
     margin: 50px;
-    flex: 5;
 }
 
 #game-area div {
-    background-color: white;
+    background-color: var(--color-dark);
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 4rem;
+}
+
+#display-area {
+    position: relative;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+#state-display{
+    font-size: 3rem;
+    padding: 40px;
+    background-color: var(--color-light);
+    box-shadow: 0px 0px 5px 2px var(--color-complementary2-light);
+    color: black;
+    border-radius: 1rem;
+    text-align: center;
+    min-width: 300px;
+}
+
+#restart-button {
+    width: 8rem;
+    height: 3rem;
+    border-radius: 0.8rem;
+    font-size: 1.5rem;
+    background-color: var(--color-medium);
+    color: white;
+    box-shadow: 2px 2px 4px black;
+}
+
+#restart-button:hover {
+    background-color: var(--color-dark);
+    cursor: pointer;
+}
+
+#restart-button:active {
+    position: relative;
+    left: 1px;
+    top: 1px;
+    box-shadow: 1px 1px 2px black;
+}
+
+#pop-up {
+    background-color: var(--color-rock);
+    /* color: white; */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 250px;
+    width: 300px;
+    /* outline: dashed red; */
+    display: grid;
+    grid-template-rows: 1fr 6fr;
+    text-align: center;
+    color: black;
+    font-size: 1.4rem;
+    align-items: center;
+}
+
+#pop-up form {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    grid-template-rows: 2fr 2fr 1fr;
+    gap: 20px;
+    padding: 1rem;
+    align-items: center;
+    justify-items: center;
+}
+
+#pop-up button {
+    grid-column: 1 / -1;
+    width: 100px;
 }
 
 

@@ -69,6 +69,9 @@ const displayController = (
         const _gameSquares = Array.from(_gameArea.children);
         const _stateDisplay = document.querySelector('#state-display')
         const _restartButton = document.querySelector('#restart-button')
+        const _popup = document.querySelector('#pop-up')
+        const _popupButton = document.querySelector('#pop-up-button')
+        const _visibleArea = document.querySelectorAll('.visible-area')
         
         //add event listeners to squares to update when pressed by player
         const activateCells = () => {
@@ -94,6 +97,12 @@ const displayController = (
                 square.innerText = board[i]
             })
         }
+
+        //show game after pressing start button in pop up
+        _popupButton.addEventListener('click', (e) => {
+            _visibleArea.forEach((area) => area.classList.toggle('inactive'))
+            _popup.classList.add('inactive')
+        })
 
         const changeStateDisplay = function (player, win=false, tie=false) {
             let text
