@@ -122,6 +122,7 @@ const displayController = (
 
                 const formData = new FormData(_popupForm)
                 const newPlayerNames = Object.fromEntries(formData.entries())
+                console.log(newPlayerNames)
 
                 //create Players
                 player1 = Player(newPlayerNames['player1'], '0');

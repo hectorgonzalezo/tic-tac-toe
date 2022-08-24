@@ -139,7 +139,7 @@ main {
     transform: translate(-50%, -50%);
     padding: 10px;
     height: auto;
-    width: auto;
+    width: clamp(450px, 30vw, 700px);
     display: grid;
     grid-template-rows: 1fr 6fr;
     text-align: center;
@@ -159,10 +159,10 @@ main {
 
 #pop-up form {
     display: grid;
-    grid-template-columns: 1fr 5fr;
+    grid-template-columns: 1fr 5fr 1fr;
     grid-template-rows: 2fr 2fr 1fr;
     gap: 10px;
-    padding: 2rem;
+    padding: 1rem;
     align-items: center;
     justify-items: start;
 }
@@ -170,6 +170,17 @@ main {
 #pop-up form img {
     justify-self: right;
     width: 55px;
+}
+
+#pop-up form select {
+    background-color: var(--color-medium);
+    color: white;
+    font-size: 1.5rem;
+    text-align: center;
+    padding: 5px 10px 5px 10px;
+    justify-self: end;
+    border-radius: 0.2rem;
+    box-shadow: 1px 1px 2px var(--color-light);
 }
 
 #pop-up input{
@@ -180,7 +191,7 @@ main {
     border-radius: 0.7rem;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     color: var(--color-dark)
 }
 ::placeholder{
