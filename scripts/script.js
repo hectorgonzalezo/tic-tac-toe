@@ -97,7 +97,14 @@ const displayController = (
         //updates DOM
         const render = function (board) {
             _gameSquares.forEach((square, i) => {
-                square.innerText = board[i]
+                //render images
+                if(board[i] != ''){
+                    const imagePath = board[i] == 'x' ? 
+                    '../images/cross.png' :
+                    '../images/circle.png'
+                square.children[0].setAttribute('src', imagePath)
+                }
+                // square.innerText = board[i]
             })
         }
 

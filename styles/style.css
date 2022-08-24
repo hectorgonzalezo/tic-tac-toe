@@ -1,6 +1,7 @@
 @import url('./reset.css');
 
 :root {
+    --color-background:#fcfbef; 
     --color-rock: #cecab4;
     --color-light: #A3C9A8;
     --color-dark: #50808E;
@@ -16,8 +17,7 @@
 } */
 
 body {
-    
-    background-color: var(--color-rock);
+    background-color: var(--color-background);
 }
 
 #visible-area {
@@ -80,6 +80,7 @@ main {
     width: 500px;
     height: 500px;
     background-color: var(--color-rock);
+    /* padding: var(--gap-size); */
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
@@ -88,8 +89,8 @@ main {
 }
 
 #game-area div {
-    background-color: var(--color-dark);
-    color: white;
+    background-color: var(--color-background);
+    color: black;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -123,20 +124,20 @@ main {
 
 #pop-up {
     background-color: var(--color-rock);
-    border: solid 2px var(--color-complementary1-dark);
-    /* color: white; */
+    border: solid 2px var(--color-dark);
+    color: black;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     padding: 10px;
     height: auto;
-    width: 300px;
-    /* outline: dashed red; */
+    width: auto;
     display: grid;
     grid-template-rows: 1fr 6fr;
     text-align: center;
-    color: black;
+    border-radius: 1rem;
+    box-shadow: 0px 0px 5px 5px var(--color-dark);
     font-size: 1.4rem;
     align-items: center;
     -webkit-animation: fadeIn 1s;
@@ -145,12 +146,35 @@ main {
 
 #pop-up form {
     display: grid;
-    grid-template-columns: 1fr 2fr;
+    grid-template-columns: 1fr 5fr;
     grid-template-rows: 2fr 2fr 1fr;
-    gap: 20px;
-    padding: 1rem;
+    gap: 10px;
+    padding: 2rem;
     align-items: center;
-    justify-items: center;
+    justify-items: start;
+}
+
+#pop-up form img {
+    justify-self: right;
+    width: 55px;
+}
+
+#pop-up input{
+    background-color: var(--color-background);
+    border: solid 2px black;
+    width: 90%;
+    height: 40%;
+    border-radius: 0.7rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    font-size: 1.2rem;
+    color: var(--color-dark)
+}
+::placeholder{
+    color: var(--color-light)
+}
+#pop-up input:focus {
+    box-shadow: 0 0 5px 5px var(--color-complementary1-light)
 }
 
 #pop-up button {
@@ -158,10 +182,13 @@ main {
     width: 100px;
     padding: 10px 0px 10px;
     font-size: 1.2rem;
+    justify-self: center;
 }
 
 
 footer {
+    position: relative;
+    outline: dashed red;
     margin-top: auto;
     display: flex;
     align-items: center;
@@ -173,6 +200,17 @@ footer {
     color: white;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     font-size: 1.5rem;
+}
+
+.credit{
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    font-size: 1rem;
+}
+
+.credit a {
+    color: var(--color-complementary1-light)
 }
 
 #github-logo {

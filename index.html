@@ -16,15 +16,15 @@
     <div id="visible-area" class="invisible">
         <main>
             <div id="game-area">
-                <div data="0"></div>
-                <div data="1"></div>
-                <div data="2"></div>
-                <div data="3"></div>
-                <div data="4"></div>
-                <div data="5"></div>
-                <div data="6"></div>
-                <div data="7"></div>
-                <div data="8"></div>
+                <div data="0"><img src="" alt=""></div>
+                <div data="1"><img src="" alt=""></div>
+                <div data="2"><img src="" alt=""></div>
+                <div data="3"><img src="" alt=""></div>
+                <div data="4"><img src="" alt=""></div>
+                <div data="5"><img src="" alt=""></div>
+                <div data="6"><img src="" alt=""></div>
+                <div data="7"><img src="" alt=""></div>
+                <div data="8"><img src="" alt=""></div>
             </div>
             <div id="display-area">
                 <h2 id="state-display"></h2>
@@ -36,15 +36,16 @@
             <a href='https://github.com/hectorgonzalezo/tic-tac-toe'>
                 <img src="./images/github-logo.png" alt="github logo" id="github-logo">
             </a>
+            <p class="credit">Icons by <a target="_blank" href="https://icons8.com">Icons8</a></p>
         </footer>
     </div>
     <div id="pop-up" class="">
         <h1>Please enter player names:</h1>
         <form action="" id="form-player-names">
-            <label for="player1">Player 1:</label>
-            <input type="text" id='player1' name='player1' placeholder='Player 1' required>
-            <label for="player2">Player 2:</label>
-            <input type="text" id='player2' name='player2' placeholder='Player 2' required>
+            <label for="player1"><img src="./images/circle.png" alt="circle icon"></label>
+            <input type="text" id='player1' name='player1' placeholder='Player name' maxlength=23 required>
+            <label for="player2"><img src="./images/cross.png" alt="cross icon"></label>
+            <input type="text" id='player2' name='player2' placeholder='Player name' maxlength= 23 required>
             <button id="pop-up-button">Start</button>
         </form>
     </div>
