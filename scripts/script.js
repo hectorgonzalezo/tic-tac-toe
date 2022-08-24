@@ -66,7 +66,7 @@ const gameBoard = (
 const displayController = (
     function () {
         const _gameArea = document.querySelector('#game-area')
-        const _gameSquares = Array.from(_gameArea.children);
+        const _gameCells = Array.from(_gameArea.children);
         const _stateDisplay = document.querySelector('#state-display')
         const _restartButton = document.querySelector('#restart-button')
         const _popup = document.querySelector('#pop-up')
@@ -74,21 +74,19 @@ const displayController = (
         const _popupButton = document.querySelector('#pop-up-button')
         const _visibleArea = document.querySelectorAll('#visible-area')
 
-        //add event listeners to squares to update when pressed by player
+        //add event listeners to cells to update when pressed by player
         const activateCells = () => {
-            _gameSquares.forEach(
-                (square) => square.addEventListener('click', _cellListenerFunc))
+            _gameCells.forEach(
+                (cell) => cell.addEventListener('click', _cellListenerFunc))
         };
 
         const _deactivateCells = () => {
-            console.log('deact')
-            _gameSquares.forEach(
-                (square) => square.removeEventListener('click', _cellListenerFunc))
+            _gameCells.forEach(
+                (cell) => square.removeEventListener('click', _cellListenerFunc))
         }
 
         const _cellListenerFunc = function () {
             game.turn(this.getAttribute('data'));
-            console.log(this)
         }
 
         //restart with button
@@ -96,15 +94,19 @@ const displayController = (
 
         //updates DOM
         const render = function (board) {
-            _gameSquares.forEach((square, i) => {
+            _gameCells.forEach((cell, i) => {
+                let imagePath
                 //render images
-                if(board[i] != ''){
-                    const imagePath = board[i] == 'x' ? 
+                if(board[i] == ''){
+                    imagePath = ''
+                } else {
+                   imagePath = board[i] == 'x' ? 
                     '../images/cross.png' :
-                    '../images/circle.png'
-                square.children[0].setAttribute('src', imagePath)
+                    '../images/circle.png';
                 }
-                // square.innerText = board[i]
+                //change img source
+                cell.children[0].setAttribute('src', imagePath)
+                
             })
         }
 
@@ -134,12 +136,12 @@ const displayController = (
                 player1.getName();
 
             if (win) {
-                text = `${player} won.`
+                text = `${player} won!`
                 _deactivateCells();
             } else if (tie) {
                 text = `It's a tie!`
             } else {
-                text = `${nextPlayer}'s turn.`
+                text = `${nextPlayer}'s turn`
             }
             _stateDisplay.innerText = text;
         }

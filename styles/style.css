@@ -2,7 +2,7 @@
 
 :root {
     --color-background:#fcfbef; 
-    --color-rock: #cecab4;
+    --color-rock: #e6e1ca;
     --color-light: #A3C9A8;
     --color-dark: #50808E;
     --color-medium: #69A297;
@@ -106,10 +106,9 @@ main {
 
 #state-display{
     font-size: 3rem;
-    padding: 40px;
-    background-color: var(--color-light);
-    box-shadow: 0px 0px 5px 2px var(--color-complementary2-light);
-    color: black;
+    padding: 40px;background-color: var(--color-rock);
+    box-shadow: 0px 0px 5px 5px var(--color-dark);
+    color: var(--color-dark);
     border-radius: 1rem;
     text-align: center;
     min-width: 300px;
@@ -144,6 +143,12 @@ main {
     animation: fadeIn 1s;
 }
 
+#pop-up > h1 {
+    color: var(--color-dark);
+    font-size: 2rem;
+    align-self: end;
+}
+
 #pop-up form {
     display: grid;
     grid-template-columns: 1fr 5fr;
@@ -174,7 +179,7 @@ main {
     color: var(--color-light)
 }
 #pop-up input:focus {
-    box-shadow: 0 0 5px 5px var(--color-complementary1-light)
+    box-shadow: 0 0 5px 5px var(--color-dark)
 }
 
 #pop-up button {
@@ -188,7 +193,6 @@ main {
 
 footer {
     position: relative;
-    outline: dashed red;
     margin-top: auto;
     display: flex;
     align-items: center;
