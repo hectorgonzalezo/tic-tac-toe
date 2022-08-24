@@ -82,7 +82,7 @@ const displayController = (
 
         const _deactivateCells = () => {
             _gameCells.forEach(
-                (cell) => square.removeEventListener('click', _cellListenerFunc))
+                (cell) => cell.removeEventListener('click', _cellListenerFunc))
         }
 
         const _cellListenerFunc = function () {
@@ -90,7 +90,10 @@ const displayController = (
         }
 
         //restart with button
-        _restartButton.addEventListener('click', () => game.restart());
+        _restartButton.addEventListener('click', () => {
+            _stateDisplay.style.color = '';
+            game.restart()
+        });
 
         //updates DOM
         const render = function (board) {
@@ -137,6 +140,7 @@ const displayController = (
 
             if (win) {
                 text = `${player} won!`
+                _stateDisplay.style.color = 'red';
                 _deactivateCells();
             } else if (tie) {
                 text = `It's a tie!`
