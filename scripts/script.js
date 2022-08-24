@@ -124,19 +124,18 @@ const displayController = (
 
                 const formData = new FormData(_popupForm)
                 const newPlayerData = Object.fromEntries(formData.entries())
-                console.log(newPlayerData)
 
                 const player1Name = newPlayerData['player1Name'];
                 const player2Name = newPlayerData['player2Name']
 
                 //create Players
-                player1 = (newPlayerData['player1Type'] == 'human') ? 
+                game.player1 = (newPlayerData['player1Type'] == 'human') ? 
                 Player(player1Name, '0') :
                 AIPlayer(player1Name, '0');
 
-                player2 = (newPlayerData['player2Type'] == 'human') ? 
+                game.player2 = (newPlayerData['player2Type'] == 'human') ? 
                 Player(player2Name, 'x') :
-                AIPlayer(player2Name, 'x')
+                AIPlayer(player2Name, 'x');
 
                 game.start();
             }
@@ -145,9 +144,9 @@ const displayController = (
         const changeStateDisplay = function (player, win = false, tie = false) {
             let text
             //get the name of the other player to post whose turn is next
-            const nextPlayer = player1.getName() == player ?
-                player2.getName() :
-                player1.getName();
+            const nextPlayer = game.player1.getName() == player ?
+                game.player2.getName() :
+                game.player1.getName();
 
             if (win) {
                 text = `${player} won!`
@@ -175,15 +174,30 @@ const Player = function (name, mark) {
         return name
     }
 
-    return { addMark, getName }
+
+    return { addMark, getName}
 }
 
-const AIPlayer = function(name) {
+const AIPlayer = function(name, mark) {
     //inherit from Player
-    const {addMark, getName} = Player(name);
+    const {addMark, getName} = Player(name, mark);
 
     //new methods
-    const addRandom = () => console.log('beeep');
+    const addRandom = (board) => {
+        //check which cells are empty and extract their indexes
+        const emptyCellsIndexes= board.reduce((acc,cell, i) => {
+            if (cell == ''){
+                acc.push(i)
+            }
+            return acc
+        }, [])
+        //choose at random from those indexes
+        const randomEmptyIndex = emptyCellsIndexes[
+            Math.floor(Math.random() * emptyCellsIndexes.length)
+        ]
+        //add mark there
+        addMark(randomEmptyIndex);
+    }
     return {addMark, getName, addRandom}
 }
 
@@ -192,22 +206,32 @@ const game = (function () {
     let counter = 0;
 
     const start = function () {
-        displayController.changeStateDisplay(player2.getName())
+        displayController.changeStateDisplay(this.player2.getName())
         displayController.activateCells();
+        //if the first player is AI make it play
+        _playAI(this.player1)
     };
-
     const turn = function (cellNum) {
         //alternate turns between players
         if (counter % 2 == 0) {
-            player1.addMark(cellNum);
+            this.player1.addMark(cellNum);
+            //check if player2 is AI
+            _playAI(this.player2)
         } else {
-            player2.addMark(cellNum);
+            this.player2.addMark(cellNum);
+            //check if player1 is AI
+            _playAI(this.player1)
         }
         counter++
     }
 
-    const _playAI = function(){
-
+    const _playAI = function(player){
+        //check if player is AI
+        if(player.hasOwnProperty('addRandom')){
+        //sends the current board so that AI can choose from empty cells
+            player.addRandom(gameBoard.getBoard())
+            counter++
+        }
     }
 
     const restart = function () {
@@ -216,14 +240,10 @@ const game = (function () {
         this.start();
     }
 
+    let player1;
+    let player2;
 
-
-    return { start, turn, restart }
+    return { start, turn, restart, player1, player2 }
 }
 )()
 
-
-
-
-let player1
-let player2
