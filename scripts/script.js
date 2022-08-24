@@ -57,8 +57,10 @@ const gameBoard = (
             })
             return win
         }
-
-        return { update, restart }
+        const getBoard = () => {
+            return _board
+        }
+        return { update, restart, getBoard }
     }
 )()
 
@@ -121,12 +123,20 @@ const displayController = (
                 _popup.classList.toggle('invisible');
 
                 const formData = new FormData(_popupForm)
-                const newPlayerNames = Object.fromEntries(formData.entries())
-                console.log(newPlayerNames)
+                const newPlayerData = Object.fromEntries(formData.entries())
+                console.log(newPlayerData)
+
+                const player1Name = newPlayerData['player1Name'];
+                const player2Name = newPlayerData['player2Name']
 
                 //create Players
-                player1 = Player(newPlayerNames['player1'], '0');
-                player2 = Player(newPlayerNames['player2'], 'x')
+                player1 = (newPlayerData['player1Type'] == 'human') ? 
+                Player(player1Name, '0') :
+                AIPlayer(player1Name, '0');
+
+                player2 = (newPlayerData['player2Type'] == 'human') ? 
+                Player(player2Name, 'x') :
+                AIPlayer(player2Name, 'x')
 
                 game.start();
             }
@@ -168,6 +178,15 @@ const Player = function (name, mark) {
     return { addMark, getName }
 }
 
+const AIPlayer = function(name) {
+    //inherit from Player
+    const {addMark, getName} = Player(name);
+
+    //new methods
+    const addRandom = () => console.log('beeep');
+    return {addMark, getName, addRandom}
+}
+
 //manages the flow of the game.
 const game = (function () {
     let counter = 0;
@@ -187,14 +206,22 @@ const game = (function () {
         counter++
     }
 
+    const _playAI = function(){
+
+    }
+
     const restart = function () {
         counter = 0;
         gameBoard.restart();
         this.start();
     }
+
+
+
     return { start, turn, restart }
 }
 )()
+
 
 
 
