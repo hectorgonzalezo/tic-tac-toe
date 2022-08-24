@@ -11,15 +11,38 @@
     --color-complementary2-dark: rgb(184, 43, 184);
 }
 
-* {
+/* * {
     outline: dashed red;
-}
+} */
 
 body {
+    
+    background-color: var(--color-rock);
+}
+
+#visible-area {
     display: grid;
     height: 100vh;
     grid-template-rows: 10fr 1fr;
-    background-color: var(--color-rock);
+}
+
+button {
+    border-radius: 0.8rem;
+    background-color: var(--color-medium);
+    color: white;
+    box-shadow: 2px 2px 4px black;
+}
+
+button:hover {
+    background-color: var(--color-dark);
+    cursor: pointer;
+}
+
+button:active {
+    position: relative;
+    left: 1px;
+    top: 1px;
+    box-shadow: 1px 1px 2px black;
 }
 
 main {
@@ -28,10 +51,28 @@ main {
     align-items: center;
     justify-content: center;
     grid-template-rows: 5fr 1fr;
+    opacity: 1;
+    -webkit-animation: fadeIn 1s;
+    animation: fadeIn 1s;
 }
 
-.inactive {
+#visible-area.invisible{
+    background-color: red;
     opacity: 0;
+    -webkit-animation: fadeOut 0s;
+    animation: fadeOut 0s; 
+    /* z-index: 2; */
+    display: none;
+}
+
+
+
+#pop-up.invisible {
+    opacity: 0;
+    -webkit-animation: fadeOut 1s;
+    animation: fadeOut 1s;
+    /* z-index: 2; */
+    display: none;
 }
 
 #game-area {
@@ -76,33 +117,20 @@ main {
 #restart-button {
     width: 8rem;
     height: 3rem;
-    border-radius: 0.8rem;
     font-size: 1.5rem;
-    background-color: var(--color-medium);
-    color: white;
-    box-shadow: 2px 2px 4px black;
 }
 
-#restart-button:hover {
-    background-color: var(--color-dark);
-    cursor: pointer;
-}
-
-#restart-button:active {
-    position: relative;
-    left: 1px;
-    top: 1px;
-    box-shadow: 1px 1px 2px black;
-}
 
 #pop-up {
     background-color: var(--color-rock);
+    border: solid 2px var(--color-complementary1-dark);
     /* color: white; */
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    height: 250px;
+    padding: 10px;
+    height: auto;
     width: 300px;
     /* outline: dashed red; */
     display: grid;
@@ -111,6 +139,8 @@ main {
     color: black;
     font-size: 1.4rem;
     align-items: center;
+    -webkit-animation: fadeIn 1s;
+    animation: fadeIn 1s;
 }
 
 #pop-up form {
@@ -126,6 +156,8 @@ main {
 #pop-up button {
     grid-column: 1 / -1;
     width: 100px;
+    padding: 10px 0px 10px;
+    font-size: 1.2rem;
 }
 
 
@@ -145,4 +177,47 @@ footer {
 
 #github-logo {
     height: 30px;
+}
+
+
+@-webkit-keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+
+
+@-webkit-keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
 }
