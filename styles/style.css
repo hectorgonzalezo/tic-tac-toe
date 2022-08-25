@@ -139,7 +139,7 @@ main {
     transform: translate(-50%, -50%);
     padding: 10px;
     height: auto;
-    width: clamp(450px, 30vw, 700px);
+    width: clamp(500px, 30vw, 700px);
     display: grid;
     grid-template-rows: 1fr 6fr;
     text-align: center;
@@ -175,7 +175,8 @@ main {
 #pop-up form select {
     background-color: var(--color-medium);
     color: white;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
+    width: calc(1.3rem * 6.3);
     text-align: center;
     padding: 5px 10px 5px 10px;
     justify-self: end;
@@ -199,6 +200,10 @@ main {
 }
 #pop-up input:focus {
     box-shadow: 0 0 5px 5px var(--color-dark)
+}
+
+#pop-up input:invalid{
+    background-color: #red;
 }
 
 #pop-up button {

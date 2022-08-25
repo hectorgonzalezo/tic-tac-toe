@@ -8,7 +8,7 @@ const gameBoard = (
             //check if any line has three consecutive marks of any kind
             const win = board.slice(0, 7).some((cell, i) => {
                 //check only every three marks if the next two are the same
-                return cell == mark && i % 3 == 0 && cell == board[i + 1] && cell == board[i + 2]
+                return cell === mark && i % 3 === 0 && cell === board[i + 1] && cell === board[i + 2]
             })
             return win
         }
@@ -17,7 +17,7 @@ const gameBoard = (
             //check vertical lines
             const win = board.slice(0, 3).some((cell, i) => {
                 //check in the first row if the two below are the same
-                return cell == mark && cell == board[i + 3] && cell == board[i + 6]
+                return cell === mark && cell === board[i + 3] && cell === board[i + 6]
             })
             return win
         }
@@ -25,10 +25,10 @@ const gameBoard = (
         const _checkWinDiagonal = function (mark, board = _board) {
             const win = board.slice(0, 3).some((cell, i) => {
                 //check every index 0 and 2
-                if (i == 0 && cell == mark && cell == board[4]) {
-                    return cell == board[8]
-                } else if (i == 2 && cell == mark && cell == board[4]) {
-                    return cell == board[6]
+                if (i === 0 && cell === mark && cell === board[4]) {
+                    return cell === board[8]
+                } else if (i == 2 && cell === mark && cell === board[4]) {
+                    return cell === board[6]
                 } else {
                     return false
                 }
@@ -61,7 +61,7 @@ const gameBoard = (
         const getBoard = () => {
             return _board
         }
-        return {checkWin, update, restart, getBoard }
+        return { checkWin, update, restart, getBoard }
     }
 )()
 
@@ -83,7 +83,7 @@ const displayController = (
                 (cell) => cell.addEventListener('click', _cellListenerFunc))
         };
 
-        const _deactivateCells = () => {
+        const deactivateCells = () => {
             _gameCells.forEach(
                 (cell) => cell.removeEventListener('click', _cellListenerFunc))
         }
@@ -106,6 +106,8 @@ const displayController = (
                 if (board[i] == '') {
                     imagePath = ''
                 } else {
+                    //deactivate cell    
+                    cell.removeEventListener('click', _cellListenerFunc)
                     imagePath = board[i] == 'x' ?
                         './images/cross.png' :
                         './images/circle.png';
@@ -118,28 +120,34 @@ const displayController = (
 
         //show game after pressing start button in pop up
         _popupButton.addEventListener('click', (e) => {
-            e.preventDefault();
+            
             if (_popupForm.checkValidity()) {
-                _visibleArea.forEach((area) => area.classList.toggle('invisible'));
-                _popup.classList.toggle('invisible');
-
+                e.preventDefault();
                 const formData = new FormData(_popupForm)
                 const newPlayerData = Object.fromEntries(formData.entries())
 
                 const player1Name = newPlayerData['player1Name'];
                 const player2Name = newPlayerData['player2Name'];
-                (newPlayerData)
+                const player1Type = newPlayerData['player1Type']
+                const player2Type = newPlayerData['player2Type']
 
-                //create Players
-                game.player1 = (newPlayerData['player1Type'] == 'human') ?
-                    Player(player1Name, '0') :
-                    AIPlayer(player1Name, '0', newPlayerData['player1Type']);//add difficulty
+                //stop game from starting if both are AIs
+                if (player1Type != 'human' && player2Type != 'human') {
+                    console.log('At least one has to be human')
+                } else {
+                    _visibleArea.forEach((area) => area.classList.toggle('invisible'));
+                _popup.classList.toggle('invisible');
+                    //create Players
+                    game.player1 = (player1Type == 'human') ?
+                        Player(player1Name, '0') :
+                        AIPlayer(player1Name, '0', player1Type);//add difficulty
 
-                game.player2 = (newPlayerData['player2Type'] == 'human') ?
-                    Player(player2Name, 'x') :
-                    AIPlayer(player2Name, 'x', newPlayerData['player2Type']);//add difficulty
+                    game.player2 = (player2Type == 'human') ?
+                        Player(player2Name, 'x') :
+                        AIPlayer(player2Name, 'x', player2Type);//add difficulty
 
-                game.start();
+                    game.start();
+                }
             }
         })
 
@@ -153,7 +161,7 @@ const displayController = (
             if (win) {
                 text = `${player} won!`
                 _stateDisplay.style.color = 'red';
-                _deactivateCells();
+                deactivateCells();
             } else if (tie) {
                 _stateDisplay.style.color = 'blue';
                 text = `It's a tie!`
@@ -162,7 +170,7 @@ const displayController = (
             }
             _stateDisplay.innerText = text;
         }
-        return { render, changeStateDisplay, activateCells }
+        return { render, changeStateDisplay, activateCells, deactivateCells }
     })();
 
 //factory function to create a player
@@ -188,10 +196,10 @@ const AIPlayer = function (name, mark, difficulty) {
 
     const _extractEmptyIndexes = (board) => {
         const result = board.reduce((acc, cell, i) => {
-            if (cell == '' || typeof (cell) == 'number') {
+            if (cell === '' || typeof (cell) === 'number') {
                 acc.push(i)
             }
-            return acc 
+            return acc
         }, [])
         return result
     }
@@ -204,14 +212,19 @@ const AIPlayer = function (name, mark, difficulty) {
         const randomEmptyIndex = emptyCellsIndexes[
             Math.floor(Math.random() * emptyCellsIndexes.length)
         ]
-        //add mark there
-        prototype.addMark(randomEmptyIndex);
+        //add mark there after random delay
+        const randomDelay = (Math.random() * 1000) + 500;
+        setTimeout(() => {
+            displayController.activateCells();
+            prototype.addMark(randomEmptyIndex)
+        },
+            randomDelay);
     };
 
     const addMiniMax = () => {
         //Original algorithm implementation by Ahmand ABdolsaheb
         //https://www.freecodecamp.org/news/how-to-make-your-tic-tac-toe-game-unbeatable-by-using-the-minimax-algorithm-9d690bad4b37/
-        const _humanMark = 'x' ? '0' : 'x';  
+        const _humanMark = mark === 'x' ? '0' : 'x';
 
         const _initialBoard = gameBoard.getBoard().map((x, i) => {
             if (x == '') {
@@ -247,8 +260,7 @@ const AIPlayer = function (name, mark, difficulty) {
 
                 /*collect the score resulted from calling minimax 
                   on the opponent of the current player*/
-
-                let result = miniMax(_opponentMark, newBoard);
+                let result = miniMax(_opponentMark, newBoard.map(x => x));
                 move.score = result.score;
 
                 // reset the spot to empty
@@ -263,31 +275,40 @@ const AIPlayer = function (name, mark, difficulty) {
 
             if (newMark === _AIMark) {
                 let bestScore = -10000;
-                for (let i = 0; i < moves.length; i++) {
-                    if (moves[i].score > bestScore) {
-                        bestScore = moves[i].score;
+                for (const [i, move] of moves.entries()) {
+                    if (move.score > bestScore) {
+                        bestScore = move.score;
                         bestMove = i;
+                    } else if (move.score === bestScore) {//choose at random if its the same score
+                        bestScore = move.score;
+                        bestMove = [bestMove, i][Math.floor(Math.random() * 2)]
                     }
                 }
             } else {
 
                 // else loop over the moves and choose the move with the lowest score
                 let bestScore = 10000;
-                for (let i = 0; i < moves.length; i++) {
-                    if (moves[i].score < bestScore) {
-                        bestScore = moves[i].score;
+                for (const [i, move] of moves.entries()) {
+                    if (move.score < bestScore) {
+                        bestScore = move.score;
                         bestMove = i;
+                    } else if (move.score === bestScore) {//choose at random if its the same score
+                        bestScore = move.score;
+                        bestMove = [bestMove, i][Math.floor(Math.random() * 2)]
                     }
                 }
             }
-            // console.log(moves)
             return moves[bestMove]
         }
 
-        const bestMove = miniMax();
+        const bestMove = miniMax(mark, _initialBoard);
 
-        // return the chosen move (object) from the moves array
-        prototype.addMark(bestMove.index);
+        //add mark there after random delay
+        const randomDelay = (Math.random() * 1000) + 500;
+        setTimeout(() => {
+            displayController.activateCells();
+            prototype.addMark(bestMove.index)
+        }, randomDelay);
     };
 
     const getDifficulty = () => {
@@ -304,7 +325,7 @@ const game = (function () {
         displayController.changeStateDisplay(this.player2.getName())
         displayController.activateCells();
         //if the first player is AI make it play
-        _playAI(this.player1)
+        _playAI(this.player1);
         displayController.render(gameBoard.getBoard())
     };
 
@@ -325,10 +346,9 @@ const game = (function () {
     }
 
     const _playAI = function (player) {
-        console.log(player)
-        if (player.hasOwnProperty('addRandom') && !gameBoard.checkWin('x') && !gameBoard.checkWin('0')) {//check if player is AI
+        //check if player is AI
+        if (player.hasOwnProperty('addRandom') && !gameBoard.checkWin('x') && !gameBoard.checkWin('0')) {
             //sends the current board so that AI can choose from empty cells
-            console.log('ai play')
             if (player.getDifficulty() == 'hard') {
                 player.addMiniMax();
             } else { //if it's easy dificulty
