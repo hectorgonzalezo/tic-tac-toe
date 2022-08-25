@@ -68,14 +68,14 @@ const gameBoard = (
 //manages all DOM updates
 const displayController = (
     function () {
-        const _gameArea = document.querySelector('#game-area')
+        const _gameArea = document.querySelector('#game-area');
         const _gameCells = Array.from(_gameArea.children);
-        const _stateDisplay = document.querySelector('#state-display')
-        const _restartButton = document.querySelector('#restart-button')
-        const _popup = document.querySelector('#pop-up')
-        const _popupForm = document.querySelector('#form-player-names')
-        const _popupButton = document.querySelector('#pop-up-button')
-        const _visibleArea = document.querySelectorAll('#visible-area')
+        const _stateDisplay = document.querySelector('#state-display');
+        const _restartButton = document.querySelector('#restart-button');
+        const _popup = document.querySelector('#pop-up');
+        const _popupForm = document.querySelector('#form-player-names');
+        const _popupButton = document.querySelector('#pop-up-button');
+        const _visibleArea = document.querySelectorAll('#visible-area');
 
         //add event listeners to cells to update when pressed by player
         const activateCells = () => {
@@ -120,7 +120,8 @@ const displayController = (
 
         //show game after pressing start button in pop up
         _popupButton.addEventListener('click', (e) => {
-            
+            //used to display error if both players are AIs
+            const alertArea = document.querySelector('#pop-up-alert')
             if (_popupForm.checkValidity()) {
                 e.preventDefault();
                 const formData = new FormData(_popupForm)
@@ -133,7 +134,8 @@ const displayController = (
 
                 //stop game from starting if both are AIs
                 if (player1Type != 'human' && player2Type != 'human') {
-                    console.log('At least one has to be human')
+                    console.log('At least one has to be human');
+                    alertArea.innerText = 'At least one has to be human!'
                 } else {
                     _visibleArea.forEach((area) => area.classList.toggle('invisible'));
                 _popup.classList.toggle('invisible');

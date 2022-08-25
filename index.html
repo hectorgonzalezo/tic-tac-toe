@@ -45,7 +45,7 @@
         <form action="" id="form-player-names">
 
             <label for="player1Name"><img src="./images/circle.png" alt="circle icon"></label>
-            <input type="text" id='player1' name='player1Name' placeholder='Player name' minlength= 0 maxlength=23 required>
+            <input type="text" id='player1' name='player1Name' placeholder='Player name' maxlength=23 required>
             <select name="player1Type" id="player1Type">
                 <optgroup label = "Player type">
                     <option value="human">Human</option>
@@ -55,7 +55,7 @@
               </select>
 
             <label for="player2Name"><img src="./images/cross.png" alt="cross icon"></label>
-            <input type="text" id='player2' name='player2Name' placeholder='Player name' minlength= 0 maxlength= 23 required>
+            <input type="text" id='player2' name='player2Name' placeholder='Player name' maxlength= 23 required>
             <select name="player2Type" id="player2Type">
                 <optgroup label = "Player type">
                     <option value="human">Human</option>
@@ -63,7 +63,7 @@
                     <option value="hard">AI - Hard</option>
                 </optgroup>
               </select>
-
+              <p id="pop-up-alert"></p>
             <button id="pop-up-button">Start</button>
         </form>
     </div>

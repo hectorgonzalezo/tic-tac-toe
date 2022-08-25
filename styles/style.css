@@ -152,9 +152,11 @@ main {
 }
 
 #pop-up > h1 {
-    color: var(--color-dark);
     font-size: 2rem;
     align-self: end;
+    color: var(--color-dark);
+
+    text-align: center;
 }
 
 #pop-up form {
@@ -202,8 +204,16 @@ main {
     box-shadow: 0 0 5px 5px var(--color-dark)
 }
 
-#pop-up input:invalid{
-    background-color: #red;
+#pop-up p {
+    grid-column: 1 / -1;
+    font-size: 1.2rem;
+    justify-self: center;
+    align-self: top;
+    position: absolute;
+    bottom: 50%;
+    right: 1%;
+    color: red;
+    text-align: center;
 }
 
 #pop-up button {
