@@ -107,8 +107,8 @@ const displayController = (
                     imagePath = ''
                 } else {
                     imagePath = board[i] == 'x' ?
-                        '../images/cross.png' :
-                        '../images/circle.png';
+                        './images/cross.png' :
+                        './images/circle.png';
                 }
                 //change img source
                 cell.children[0].setAttribute('src', imagePath)
