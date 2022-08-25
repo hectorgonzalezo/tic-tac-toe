@@ -48,7 +48,7 @@ const gameBoard = (
         const update = function (cellNum, mark, name) {
             if (_board[cellNum] == '') {//don't update if cell has already been played
                 _board[cellNum] = mark;
-                displayController.render(_board);
+                displayController.render(_board, cellNum);
                 displayController.changeStateDisplay(name, checkWin(mark), _checkTie())
             };
         }
@@ -99,7 +99,7 @@ const displayController = (
         });
 
         //updates DOM
-        const render = function (board) {
+        const render = function (board, cellNum=null) {
             _gameCells.forEach((cell, i) => {
                 let imagePath
                 //render images
@@ -111,12 +111,17 @@ const displayController = (
                     imagePath = board[i] == 'x' ?
                         './images/cross.png' :
                         './images/circle.png';
-                }
-                //change img source
-                cell.children[0].setAttribute('src', imagePath)
 
+                    if (cellNum == i) {
+                    cell.children[0].classList.toggle('chosen')
+                    }
+                };
+                //change img source
+                    cell.children[0].setAttribute('src', imagePath);
             })
-        }
+
+            cellNum
+        };
 
         //show game after pressing start button in pop up
         _popupButton.addEventListener('click', (e) => {
@@ -138,7 +143,7 @@ const displayController = (
                     alertArea.innerText = 'At least one has to be human!'
                 } else {
                     _visibleArea.forEach((area) => area.classList.toggle('invisible'));
-                _popup.classList.toggle('invisible');
+                    _popup.classList.toggle('invisible');
                     //create Players
                     game.player1 = (player1Type == 'human') ?
                         Player(player1Name, '0') :
