@@ -74,11 +74,15 @@ main {
     display: none;
 }
 
-#title {
-    text-align: center;
-    font-size: 4rem;
+#state-display{
+    margin-top: 2vh;
+    font-size: 3rem;
+    padding: 40px;background-color: var(--color-rock);
+    box-shadow: 0px 0px 5px 5px var(--color-dark);
     color: var(--color-dark);
-    letter-spacing: 0.8rem;
+    border-radius: 1rem;
+    text-align: center;
+    min-width: 300px;
 }
 
 #game-area {
@@ -118,15 +122,7 @@ main {
     margin-bottom: 20px;
 }
 
-#state-display{
-    font-size: 3rem;
-    padding: 40px;background-color: var(--color-rock);
-    box-shadow: 0px 0px 5px 5px var(--color-dark);
-    color: var(--color-dark);
-    border-radius: 1rem;
-    text-align: center;
-    min-width: 300px;
-}
+
 
 #restart-button {
     width: 8rem;

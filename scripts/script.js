@@ -96,6 +96,7 @@ const displayController = (
         _restartButton.addEventListener('click', () => {
             _stateDisplay.style.color = '';
             game.restart()
+            _gameCells.forEach((cell) => cell.children[0].classList.remove('chosen'))
         });
 
         //updates DOM
@@ -113,7 +114,7 @@ const displayController = (
                         './images/circle.png';
 
                     if (cellNum == i) {
-                    cell.children[0].classList.toggle('chosen')
+                    cell.children[0].classList.add('chosen')
                     }
                 };
                 //change img source
