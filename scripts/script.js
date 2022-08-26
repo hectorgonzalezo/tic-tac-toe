@@ -1,8 +1,6 @@
-//module for gameboard
 const gameBoard = (
     function () {
         let _board = new Array(9).fill('');
-        // let _board = ['0', '', 'x', 'x', '', 'x', '', '0', '0']
 
         const _checkWinHorizontal = function (mark, board = _board) {
             //check if any line has three consecutive marks of any kind
@@ -184,10 +182,10 @@ const displayController = (
 
             if (win) {
                 text = `${player} won!`
-                _stateDisplay.style.color = 'red';
+                _stateDisplay.style.color = 'var(--color-complementary2-dark';
                 deactivateCells();
             } else if (tie) {
-                _stateDisplay.style.color = 'blue';
+                _stateDisplay.style.color = 'var(--color-complementary1-dark)';
                 text = `It's a tie!`
             } else {
                 text = `${nextPlayer.getName()}'s turn`
