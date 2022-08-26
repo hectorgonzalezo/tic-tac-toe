@@ -176,7 +176,7 @@ main h1 {
 #buttons-area {
     position: relative;
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
     width: 50vw;
     align-items: center;
     gap: calc(20px + 4vw);

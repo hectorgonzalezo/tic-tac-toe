@@ -72,6 +72,7 @@ const displayController = (
         const _gameCells = Array.from(_gameArea.children);
         const _stateDisplay = document.querySelector('#state-display');
         const _restartButton = document.querySelector('#restart-button');
+        const _choosePlayersButton = document.querySelector('#choose-players-button');
         const _popup = document.querySelector('#pop-up');
         const _popupForm = document.querySelector('#form-player-names');
         const _popupButton = document.querySelector('#pop-up-button');
@@ -81,21 +82,20 @@ const displayController = (
 
         const _cellListenerFunc = function () {
             game.turn(this.getAttribute('data'));
+        };
+
+        const _togglePopup = () => { 
+            _popup.classList.toggle('invisible')
+            _visibleArea.forEach((area) => area.classList.toggle('invisible'));
         }
 
         //restart with button
         _restartButton.addEventListener('click', () => {
             _stateDisplay.style.color = '';
             game.restart()
-            //restart cells
-            _gameCells.forEach((cell) => {
-                cell.children[0].classList.remove('chosen');
-                // cell.classList.remove('chosen');
-                cell.classList.add('circle')
-            })
         });
 
-
+        _choosePlayersButton.addEventListener('click', _togglePopup);
 
         //show game after pressing start button in pop up
         _popupButton.addEventListener('click', (e) => {
@@ -108,16 +108,14 @@ const displayController = (
 
                 const player1Name = newPlayerData['player1Name'];
                 const player2Name = newPlayerData['player2Name'];
-                const player1Type = newPlayerData['player1Type']
-                const player2Type = newPlayerData['player2Type']
+                const player1Type = newPlayerData['player1Type'];
+                const player2Type = newPlayerData['player2Type'];
 
                 //stop game from starting if both are AIs
                 if (player1Type != 'human' && player2Type != 'human') {
-                    console.log('At least one has to be human');
-                    alertArea.innerText = 'At least one has to be human!'
+                    alertArea.innerText = 'At least one has to be human!';
                 } else {
-                    _visibleArea.forEach((area) => area.classList.toggle('invisible'));
-                    _popup.classList.toggle('invisible');
+                    _togglePopup();
                     //create Players
                     game.player1 = (player1Type == 'human') ?
                         Player(player1Name, '0') :
@@ -127,10 +125,20 @@ const displayController = (
                         Player(player2Name, 'x') :
                         AIPlayer(player2Name, 'x', player2Type);//add difficulty
 
-                    game.start();
+                    game.restart();
+                    _popupForm.reset();
                 }
             }
         });
+
+        const restartCells = function () {
+            _gameCells.forEach((cell) => {
+                cell.children[0].classList.remove('chosen');
+                cell.classList.remove('chosen');
+                cell.classList.remove('circle')
+           }
+            )
+        };
 
         //updates DOM
         const render = function (board, cellNum = null) {
@@ -202,7 +210,7 @@ const displayController = (
             _gameCells.forEach( (cell) => cell.classList.add('chosen'))
         }
 
-        return { render, changeStateDisplay, activateCells, deactivateCells, deactivateHover }
+        return { render, changeStateDisplay, activateCells, deactivateCells, deactivateHover, restartCells }
     })();
 
 //factory function to create a player
@@ -355,6 +363,7 @@ const game = (function () {
 
     const start = function () {
         counter = 0;
+        displayController.restartCells();
         displayController.changeStateDisplay(this.player2.getName())
         displayController.activateCells();
         //if the first player is AI make it play
@@ -401,6 +410,7 @@ const game = (function () {
 
     const restart = function () {
         gameBoard.restart();
+        
         this.start();
     }
 
