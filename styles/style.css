@@ -20,6 +20,8 @@ body {
     background-color: var(--color-background);
 }
 
+
+
 #visible-area {
     display: grid;
     height: 100vh;
@@ -87,6 +89,7 @@ main {
 
 #game-area {
     --gap-size: 15px;
+    position: relative;
     width: 500px;
     height: 500px;
     background-color: var(--color-dark);
@@ -100,6 +103,7 @@ main {
 
 #game-area div {
     background-color: var(--color-background);
+    position: relative;
     color: black;
     display: flex;
     align-items: center;
@@ -107,11 +111,36 @@ main {
     font-size: 4rem;
 }
 
+
+#game-area  div.circle:hover::before {    
+    background-image: url('../images/circle.png');
+}
+
+#game-area div:hover::before {    
+    content: "";
+    background-image: url('../images/cross.png');
+    background-size: 61%;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    opacity: 0.25;
+}
+
 #game-area img.chosen {
     opacity: 1;
     -webkit-animation: fadeIn 1s;
     animation: fadeIn 1s;
 }
+
+#game-area div.chosen:hover::before {
+    background-image: none;
+    opacity: 0;;
+}
+
 
 #display-area {
     position: relative;

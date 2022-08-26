@@ -77,16 +77,7 @@ const displayController = (
         const _popupButton = document.querySelector('#pop-up-button');
         const _visibleArea = document.querySelectorAll('#visible-area');
 
-        //add event listeners to cells to update when pressed by player
-        const activateCells = () => {
-            _gameCells.forEach(
-                (cell) => cell.addEventListener('click', _cellListenerFunc))
-        };
 
-        const deactivateCells = () => {
-            _gameCells.forEach(
-                (cell) => cell.removeEventListener('click', _cellListenerFunc))
-        }
 
         const _cellListenerFunc = function () {
             game.turn(this.getAttribute('data'));
@@ -96,33 +87,15 @@ const displayController = (
         _restartButton.addEventListener('click', () => {
             _stateDisplay.style.color = '';
             game.restart()
-            _gameCells.forEach((cell) => cell.children[0].classList.remove('chosen'))
+            //restart cells
+            _gameCells.forEach((cell) => {
+                cell.children[0].classList.remove('chosen');
+                // cell.classList.remove('chosen');
+                cell.classList.add('circle')
+            })
         });
 
-        //updates DOM
-        const render = function (board, cellNum=null) {
-            _gameCells.forEach((cell, i) => {
-                let imagePath
-                //render images
-                if (board[i] == '') {
-                    imagePath = ''
-                } else {
-                    //deactivate cell    
-                    cell.removeEventListener('click', _cellListenerFunc)
-                    imagePath = board[i] == 'x' ?
-                        './images/cross.png' :
-                        './images/circle.png';
 
-                    if (cellNum == i) {
-                    cell.children[0].classList.add('chosen')
-                    }
-                };
-                //change img source
-                    cell.children[0].setAttribute('src', imagePath);
-            })
-
-            cellNum
-        };
 
         //show game after pressing start button in pop up
         _popupButton.addEventListener('click', (e) => {
@@ -157,14 +130,49 @@ const displayController = (
                     game.start();
                 }
             }
-        })
+        });
+
+        //updates DOM
+        const render = function (board, cellNum = null) {
+            _gameCells.forEach((cell, i) => {
+                let imagePath
+                //render images
+                if (board[i] == '') {
+                    imagePath = ''
+                    cell.classList.remove('chosen')
+                } else {
+                    //deactivate cell    
+                    cell.removeEventListener('click', _cellListenerFunc)
+                    imagePath = board[i] == 'x' ?
+                        './images/cross.png' :
+                        './images/circle.png';
+
+                    if (cellNum == i) {
+                        cell.children[0].classList.add('chosen')
+                        cell.classList.add('chosen')
+                    }
+                };
+                //change img source
+                cell.children[0].setAttribute('src', imagePath);
+            })
+
+        };
 
         const changeStateDisplay = function (player, win = false, tie = false) {
             let text
-            //get the name of the other player to post whose turn is next
+            //get the other player to post whose turn is next
             const nextPlayer = game.player1.getName() == player ?
-                game.player2.getName() :
-                game.player1.getName();
+                game.player2 :
+                game.player1;
+
+            //change class for div:hover
+            _gameCells.forEach((cell) => cell.classList.toggle('circle'));
+
+            //if the next player is AI
+            if (nextPlayer.hasOwnProperty('addRandom')) {
+                //stop player from choosing for them
+                _gameCells.forEach((cell) => cell.classList.add('chosen'))
+            }
 
             if (win) {
                 text = `${player} won!`
@@ -174,11 +182,27 @@ const displayController = (
                 _stateDisplay.style.color = 'blue';
                 text = `It's a tie!`
             } else {
-                text = `${nextPlayer}'s turn`
+                text = `${nextPlayer.getName()}'s turn`
             }
             _stateDisplay.innerText = text;
+        };
+
+        //add event listeners to cells to update when pressed by player
+        const activateCells = () => {
+            _gameCells.forEach(
+                (cell) => cell.addEventListener('click', _cellListenerFunc))
+        };
+
+        const deactivateCells = () => {
+            _gameCells.forEach(
+                (cell) => cell.removeEventListener('click', _cellListenerFunc))
         }
-        return { render, changeStateDisplay, activateCells, deactivateCells }
+
+        const deactivateHover = () => {
+            _gameCells.forEach( (cell) => cell.classList.add('chosen'))
+        }
+
+        return { render, changeStateDisplay, activateCells, deactivateCells, deactivateHover }
     })();
 
 //factory function to create a player
@@ -312,7 +336,7 @@ const AIPlayer = function (name, mark, difficulty) {
         const bestMove = miniMax(mark, _initialBoard);
 
         //add mark there after random delay
-        const randomDelay = (Math.random() * 1000) + 500;
+        const randomDelay = (Math.random() * 500) + 500;
         setTimeout(() => {
             displayController.activateCells();
             prototype.addMark(bestMove.index)
@@ -330,11 +354,14 @@ const game = (function () {
     let counter = 0;
 
     const start = function () {
+        counter = 0;
         displayController.changeStateDisplay(this.player2.getName())
         displayController.activateCells();
         //if the first player is AI make it play
         _playAI(this.player1);
+        if(!this.player1.hasOwnProperty('addRandom')){
         displayController.render(gameBoard.getBoard())
+        }
     };
 
     //plays a turn
@@ -342,24 +369,30 @@ const game = (function () {
         //alternate turns between players
         if (counter % 2 == 0) {
             this.player1.addMark(cellNum);
+            counter++
             //check if player2 is AI
             _playAI(this.player2)
         } else {
             this.player2.addMark(cellNum);
+            counter++
             //check if player1 is AI
             _playAI(this.player1)
 
         }
-        counter++
+        
     }
 
     const _playAI = function (player) {
         //check if player is AI
         if (player.hasOwnProperty('addRandom') && !gameBoard.checkWin('x') && !gameBoard.checkWin('0')) {
+            if (counter == 0) {
+                console.log('startai')
+                displayController.deactivateHover();
+            }
             //sends the current board so that AI can choose from empty cells
             if (player.getDifficulty() == 'hard') {
                 player.addMiniMax();
-            } else { //if it's easy dificulty
+            } else { //if it's easy difficulty
                 player.addRandom()
             }
             counter++
@@ -367,7 +400,6 @@ const game = (function () {
     }
 
     const restart = function () {
-        counter = 0;
         gameBoard.restart();
         this.start();
     }
