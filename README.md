@@ -18,4 +18,4 @@ Build as part of [The Odin Project](https://www.theodinproject.com/) curriculum.
 
 - My Implementation of the Minimax algorithm is based on [Ahmad Abdolsaheb's](https://github.com/ahmadabdolsaheb/minimaxarticle) as described in [this article](https://www.freecodecamp.org/news/how-to-make-your-tic-tac-toe-game-unbeatable-by-using-the-minimax-algorithm-9d690bad4b37/).
 
-- Icons by (Icons8)[https://icons8.com].
+- Icons by [Icons8](https://icons8.com).
