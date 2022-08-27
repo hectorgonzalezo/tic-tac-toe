@@ -1,5 +1,7 @@
 @import url('./reset.css');
 
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+
 :root {
     --color-background:#fcfbef; 
     --color-rock: #e6e1ca;
@@ -10,6 +12,7 @@
     --color-complementary1-dark:  rgb(218, 163, 54);
     --color-complementary2-light: rgb(255, 209, 255);
     --color-complementary2-dark: rgb(184, 43, 184);
+    
 }
 
 
@@ -33,6 +36,7 @@
 
 body {
     background-color: var(--color-background);
+    font-family: 'Roboto', sans-serif;
 }
 
 
