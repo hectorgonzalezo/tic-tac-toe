@@ -53,7 +53,6 @@ const gameBoard = (
             if (_board[cellNum] == '') {//don't update if cell has already been played
                 _board[cellNum] = mark;
             };
-            console.log('updated')
         }
 
         const _restart = function () {
@@ -114,7 +113,7 @@ const popUp = (
                     const player2 = (player2Type == 'human') ?
                         Player(player2Name, 'x') :
                         AIPlayer(player2Name, 'x', player2Type);//add difficulty
-                    
+
 
                     PubSub.publish('game-start', { player1, player2 })
                     _popupForm.reset();
@@ -141,7 +140,7 @@ const displayController = (
         //restart with button
         _restartButton.addEventListener('click', () => {
             _stateDisplay.style.color = '';
-            PubSub.publish('game-start', {'player1': game.getPlayer1(), 'cellNum': 9})
+            PubSub.publish('game-start', { 'player1': game.getPlayer1(), 'cellNum': 9 })
         });
 
 
@@ -258,11 +257,11 @@ const Player = function (name, mark) {
         return name
     }
 
-    const getMark = function() {
+    const getMark = function () {
         return _mark
     }
 
-    return { addMark, getName, getMark}
+    return { addMark, getName, getMark }
 }
 
 const AIPlayer = function (name, mark, difficulty) {
@@ -271,9 +270,7 @@ const AIPlayer = function (name, mark, difficulty) {
     const _AIMark = mark;
 
     const _extractEmptyIndexes = (board) => {
-        // console.log(board)
         const result = board.reduce((acc, cell, i) => {
-            // console.log(cell)
             if (cell === '' || typeof (cell) === 'number') {
                 acc.push(i)
             }
@@ -284,7 +281,6 @@ const AIPlayer = function (name, mark, difficulty) {
 
     //new methods
     const addRandom = () => {
-        console.log('playRandom')
         //check which cells are empty and extract their indexes
         const emptyCellsIndexes = _extractEmptyIndexes(gameBoard.getBoard())
         //choose at random from those indexes
@@ -292,18 +288,16 @@ const AIPlayer = function (name, mark, difficulty) {
             Math.floor(Math.random() * emptyCellsIndexes.length)
         ]
         //add mark there after random delay
-            PubSub.publish('ai-turn-end');
-            //ya displayController.activateCells();
-            prototype.addMark(randomEmptyIndex)
-  
+        PubSub.publish('ai-turn-end');
+        //ya displayController.activateCells();
+        prototype.addMark(randomEmptyIndex)
+
     };
 
     const addMiniMax = () => {
-        console.log('playHArd!')
         //Original algorithm implementation by Ahmand ABdolsaheb
         //https://www.freecodecamp.org/news/how-to-make-your-tic-tac-toe-game-unbeatable-by-using-the-minimax-algorithm-9d690bad4b37/
         const _humanMark = mark === 'x' ? '0' : 'x';
-        console.log(gameBoard.getBoard())
 
         const _initialBoard = gameBoard.getBoard().map((x, i) => {
             if (x == '') {
@@ -381,11 +375,9 @@ const AIPlayer = function (name, mark, difficulty) {
         }
 
         const bestMove = miniMax(mark, _initialBoard);
-        console.log(bestMove)
 
-            PubSub.publish('ai-turn-end');
-            //ya displayController.activateCells();
-            prototype.addMark(bestMove.index);
+        PubSub.publish('ai-turn-end');
+        prototype.addMark(bestMove.index);
     };
 
     const getDifficulty = () => {
@@ -417,9 +409,9 @@ const game = (function () {
         _playAI(_player1, _player2);
     };
 
-    const _publishTurnPassed = function(name, mark, nextPlayer){
-        PubSub.publish('turn-passed', {name, mark, nextPlayer})
-}
+    const _publishTurnPassed = function (name, mark, nextPlayer) {
+        PubSub.publish('turn-passed', { name, mark, nextPlayer })
+    }
 
     //plays a turn
     const _turn = function (msg, data) {
@@ -441,22 +433,25 @@ const game = (function () {
         };
     }
 
-  
+
 
     const _playAI = function (player, nextPlayer) {
+        const randomDelay = (Math.random() * 1000) + 500;
+        PubSub.publish('ai-turn-start', '');
+        //delay allows for board to update, 
+        //needed for lookup in addMiniMax and for checkWins
+        setTimeout( () => {
         //check if player is AI
         if (player.hasOwnProperty('addRandom') && !gameBoard.checkWin('x') && !gameBoard.checkWin('0')) {
-            PubSub.publish('ai-turn-start', '');
-            _publishTurnPassed(player.getName(), player.getMark(), nextPlayer)
-            //delay allows for board to update, needed for lookup in addMiniMax
-            const randomDelay = (Math.random() * 1000) + 500;
             if (player.getDifficulty() == 'hard') {
-                setTimeout(()=> player.addMiniMax(), randomDelay);
+                    player.addMiniMax();
             } else { //if it's easy difficulty
-                setTimeOut(()=> player.addRandom(), randomDelay);
+                    player.addRandom()
             }
+            _publishTurnPassed(player.getName(), player.getMark(), nextPlayer)
             counter++
         }
+    })
     }
 
     PubSub.subscribe('game-start', _start);
@@ -465,4 +460,3 @@ const game = (function () {
     return { getPlayer1, getPlayer2 }
 }
 )()
-
