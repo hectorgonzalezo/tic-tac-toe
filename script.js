@@ -1,3 +1,5 @@
+const PubSub = require('pubsub-js');
+
 const gameBoard = (
     function () {
         let _board = new Array(9).fill('');
