@@ -1,4 +1,4 @@
-const PubSub = require('pubsub-js');
+import PubSub from 'pubsub-js';
 
 const gameBoard = (
     function () {
@@ -36,7 +36,7 @@ const gameBoard = (
             return win
         }
 
-        const _checkTie = function (board = _board) {
+        const checkTie = function (board = _board) {
             return board.every((cell) => cell != '')
         }
 
@@ -45,55 +45,47 @@ const gameBoard = (
 
         }
 
-        const update = function (cellNum, mark, name) {
+        const _update = function (msg, data) {
+            //extract data from PubSub
+            const {cellNum, mark} = data;
+
             if (_board[cellNum] == '') {//don't update if cell has already been played
                 _board[cellNum] = mark;
-                displayController.render(_board, cellNum);
-                displayController.changeStateDisplay(name, checkWin(mark), _checkTie())
+
+                //ya! displayController.render(_board, cellNum);
+                //ya! displayController.changeStateDisplay(name, checkWin(mark), _checkTie())
             };
         }
+        //subscribe to event triggered when player adds a mark
+        PubSub.subscribe('mark-added', _update)
 
-        const restart = function () {
+        const _restart = function () {
             _board = new Array(9).fill('');
-            displayController.render(_board)
+            //ya displayController.render(_board)
         }
+
+        PubSub.subscribe('game-restart', _restart)
 
         const getBoard = () => {
             return _board
         }
-        return { checkWin, update, restart, getBoard }
+        return { checkTie, checkWin, getBoard }
     }
-)()
+)();
 
-//manages all DOM updates
-const displayController = (
-    function () {
-        const _gameArea = document.querySelector('#game-area');
-        const _gameCells = Array.from(_gameArea.children);
-        const _stateDisplay = document.querySelector('#state-display');
-        const _restartButton = document.querySelector('#restart-button');
-        const _choosePlayersButton = document.querySelector('#choose-players-button');
+const popUp = (
+    function(){
         const _popup = document.querySelector('#pop-up');
         const _popupForm = document.querySelector('#form-player-names');
         const _popupButton = document.querySelector('#pop-up-button');
+        const _choosePlayersButton = document.querySelector('#choose-players-button');
         const _visibleArea = document.querySelectorAll('#visible-area');
 
-
-
-        const _cellListenerFunc = function () {
-            game.turn(this.getAttribute('data'));
-        };
 
         const _togglePopup = () => { 
             _popup.classList.toggle('invisible')
             _visibleArea.forEach((area) => area.classList.toggle('invisible'));
         }
-
-        //restart with button
-        _restartButton.addEventListener('click', () => {
-            _stateDisplay.style.color = '';
-            game.restart()
-        });
 
         _choosePlayersButton.addEventListener('click', _togglePopup);
 
@@ -116,22 +108,46 @@ const displayController = (
                     alertArea.innerText = 'At least one has to be human!';
                 } else {
                     _togglePopup();
-                    //create Players
-                    game.player1 = (player1Type == 'human') ?
+
+                    const player1 = (player1Type == 'human') ?
                         Player(player1Name, '0') :
                         AIPlayer(player1Name, '0', player1Type);//add difficulty
 
-                    game.player2 = (player2Type == 'human') ?
+                    const player2 = (player2Type == 'human') ?
                         Player(player2Name, 'x') :
                         AIPlayer(player2Name, 'x', player2Type);//add difficulty
 
-                    game.restart();
+                    PubSub.publish('game-start', {player1, player2})
                     _popupForm.reset();
                 }
             }
         });
+    }
+)()
 
-        const restartCells = function () {
+//manages all game updates
+const displayController = (
+    function () {
+        const _gameArea = document.querySelector('#game-area');
+        const _gameCells = Array.from(_gameArea.children);
+        const _stateDisplay = document.querySelector('#state-display');
+        const _restartButton = document.querySelector('#restart-button');
+
+        const _cellListenerFunc = function () {
+            //send the cell as a number
+            PubSub.publish('cell-pressed', parseInt(this.getAttribute('data')))
+        };
+
+
+        //restart with button
+        _restartButton.addEventListener('click', () => {
+            _stateDisplay.style.color = '';
+            //ya game.restart()
+            PubSub.publish('game-restart','');
+        });
+
+
+        const _restartCells = function () {
             _gameCells.forEach((cell) => {
                 cell.children[0].classList.remove('chosen');
                 cell.classList.remove('chosen');
@@ -141,38 +157,47 @@ const displayController = (
         };
 
         //updates DOM
-        const render = function (board, cellNum = null) {
-            _gameCells.forEach((cell, i) => {
-                let imagePath
-                //render images
-                if (board[i] == '') {
-                    imagePath = ''
-                    cell.classList.remove('chosen')
-                } else {
-                    //deactivate cell    
-                    cell.removeEventListener('click', _cellListenerFunc)
-                    imagePath = board[i] == 'x' ?
-                        './images/cross.png' :
-                        './images/circle.png';
+        const _render = function (msg, data) {
+            //_render if first player isn't AI.
+                const board = gameBoard.getBoard();
+                const { cellNum } = data;
+                _gameCells.forEach((cell, i) => {
+                    let imagePath
+                    //_render images
+                    if (board[i] == '') {
+                        imagePath = ''
+                        cell.classList.remove('chosen')
+                    } else {
+                        //deactivate cell    
+                        cell.removeEventListener('click', _cellListenerFunc)
+                        imagePath = board[i] == 'x' ?
+                            './images/cross.png' :
+                            './images/circle.png';
 
-                    if (cellNum == i) {
-                        cell.children[0].classList.add('chosen')
-                        cell.classList.add('chosen')
+                        if (cellNum == i) {
+                            cell.children[0].classList.add('chosen')
+                            cell.classList.add('chosen')
                     }
                 };
                 //change img source
                 cell.children[0].setAttribute('src', imagePath);
-            })
-
+            })    
         };
 
-        const changeStateDisplay = function (player, win = false, tie = false) {
-            let text
-            //get the other player to post whose turn is next
-            const nextPlayer = game.player1.getName() == player ?
-                game.player2 :
-                game.player1;
 
+        const _changeStateDisplay = function (msg, data) {
+            let text
+            if (msg == 'mark-added') {
+            const {name, mark} = data;
+            const win = gameBoard.checkWin(mark);
+            const tie = gameBoard.checkTie();
+
+            
+            //get the other player to post whose turn is next
+            const nextPlayer = game.getPlayer1['name'] == name ?
+                game.getPlayer2() :
+                game.getPlayer1();
+            
             //change class for div:hover
             _gameCells.forEach((cell) => cell.classList.toggle('circle'));
 
@@ -183,34 +208,50 @@ const displayController = (
             }
 
             if (win) {
-                text = `${player} won!`
+                text = `${name} won!`
                 _stateDisplay.style.color = 'var(--color-complementary2-dark';
-                deactivateCells();
+                _deactivateCells();
             } else if (tie) {
                 _stateDisplay.style.color = 'var(--color-complementary1-dark)';
                 text = `It's a tie!`
             } else {
                 text = `${nextPlayer.getName()}'s turn`
             }
+        } else 
+        {
+            console.log(data)
+            text = `${data['player2'].getName()}'s turn` 
+        }
             _stateDisplay.innerText = text;
         };
 
+
         //add event listeners to cells to update when pressed by player
-        const activateCells = () => {
+        const _activateCells = () => {
             _gameCells.forEach(
                 (cell) => cell.addEventListener('click', _cellListenerFunc))
         };
 
-        const deactivateCells = () => {
+        const _deactivateCells = () => {
             _gameCells.forEach(
                 (cell) => cell.removeEventListener('click', _cellListenerFunc))
         }
 
-        const deactivateHover = () => {
+        const _deactivateHover = () => {
             _gameCells.forEach( (cell) => cell.classList.add('chosen'))
         }
 
-        return { render, changeStateDisplay, activateCells, deactivateCells, deactivateHover, restartCells }
+        PubSub.subscribe('mark-added', _render);
+        PubSub.subscribe('mark-added', _changeStateDisplay);
+        PubSub.subscribe('game-start',  _restartCells);
+        PubSub.subscribe('game-start', _activateCells);
+        PubSub.subscribe('game-start', _changeStateDisplay);
+        PubSub.subscribe('game-start', _render);
+        PubSub.subscribe('ai-turn-start', _deactivateHover);
+        PubSub.subscribe('ai-turn-start', _deactivateCells)
+        PubSub.subscribe('ai-turn-end', _activateCells);
+        PubSub.subscribe('game-restart', _render)
+
     })();
 
 //factory function to create a player
@@ -218,7 +259,7 @@ const Player = function (name, mark) {
     const _mark = mark;
 
     const addMark = function (cellNum) {//adds a mark on gameBoard
-        gameBoard.update(cellNum, _mark, name);
+        PubSub.publish('mark-added', {cellNum, mark:_mark, name})
     }
 
     const getName = function () {
@@ -255,7 +296,8 @@ const AIPlayer = function (name, mark, difficulty) {
         //add mark there after random delay
         const randomDelay = (Math.random() * 1000) + 500;
         setTimeout(() => {
-            displayController.activateCells();
+            PubSub.publish('ai-turn-end');
+            //ya displayController.activateCells();
             prototype.addMark(randomEmptyIndex)
         },
             randomDelay);
@@ -346,7 +388,8 @@ const AIPlayer = function (name, mark, difficulty) {
         //add mark there after random delay
         const randomDelay = (Math.random() * 500) + 500;
         setTimeout(() => {
-            displayController.activateCells();
+            PubSub.publish('ai-turn-end');
+            //ya displayController.activateCells();
             prototype.addMark(bestMove.index)
         }, randomDelay);
     };
@@ -360,43 +403,62 @@ const AIPlayer = function (name, mark, difficulty) {
 //manages the flow of the game.
 const game = (function () {
     let counter = 0;
+    let _player1;
+    let _player2;
 
-    const start = function () {
+    const getPlayer1 = function() {
+        return _player1
+    }
+
+    const getPlayer2 = function() {
+        return _player2
+    }
+
+    const _start = function(msg, data) {
+        //when restarting, leave same players
+        _player1 = data['player1'] ? data['player1'] : _player1;
+        _player2 = data['player2'] ? data['player2'] : _player2;
         counter = 0;
-        displayController.restartCells();
-        displayController.changeStateDisplay(this.player2.getName())
-        displayController.activateCells();
+        //ya displayController.restartCells();
+        //ya displayController.changeStateDisplay(this.player2.getName())
+        //ya displayController.activateCells();
         //if the first player is AI make it play
-        _playAI(this.player1);
-        if(!this.player1.hasOwnProperty('addRandom')){
-        displayController.render(gameBoard.getBoard())
-        }
+        _playAI(_player1);
+        //no! if(!_player1.hasOwnProperty('addRandom')){
+        // displayController.render(gameBoard.getBoard())
+        // }
     };
 
+    PubSub.subscribe('game-start', _start);
+
     //plays a turn
-    const turn = function (cellNum) {
+    const _turn = function (msg, data) {
+        const cellNum = data
         //alternate turns between players
         if (counter % 2 == 0) {
-            this.player1.addMark(cellNum);
+            _player1.addMark(cellNum);
             counter++
             //check if player2 is AI
-            _playAI(this.player2)
+            _playAI(_player2)
         } else {
-            this.player2.addMark(cellNum);
+            _player2.addMark(cellNum);
             counter++
             //check if player1 is AI
-            _playAI(this.player1)
+            _playAI(_player1)
 
         }
         
     }
+
+    PubSub.subscribe('cell-pressed', _turn)
 
     const _playAI = function (player) {
         //check if player is AI
         if (player.hasOwnProperty('addRandom') && !gameBoard.checkWin('x') && !gameBoard.checkWin('0')) {
             if (counter == 0) {
                 console.log('startai')
-                displayController.deactivateHover();
+                //ya displayController.deactivateHover();
+                PubSub.publish('ai-turn-start', '')
             }
             //sends the current board so that AI can choose from empty cells
             if (player.getDifficulty() == 'hard') {
@@ -408,16 +470,9 @@ const game = (function () {
         }
     }
 
-    const restart = function () {
-        gameBoard.restart();
-        
-        this.start();
-    }
+    PubSub.subscribe('game-restart', _start)
 
-    let player1;
-    let player2;
-
-    return { start, turn, restart, player1, player2 }
+    return {getPlayer1, getPlayer2 }
 }
 )()
 
