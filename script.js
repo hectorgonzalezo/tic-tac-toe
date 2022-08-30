@@ -1,8 +1,9 @@
+"use strict"
 import PubSub from 'pubsub-js';
 
 const gameBoard = (
     function () {
-        let _board = new Array(9).fill('');
+        let _board;
 
         const _checkWinHorizontal = function (mark, board = _board) {
             //check if any line has three consecutive marks of any kind
@@ -47,24 +48,21 @@ const gameBoard = (
 
         const _update = function (msg, data) {
             //extract data from PubSub
-            const {cellNum, mark} = data;
+            const { cellNum, mark } = data;
 
             if (_board[cellNum] == '') {//don't update if cell has already been played
                 _board[cellNum] = mark;
-
-                //ya! displayController.render(_board, cellNum);
-                //ya! displayController.changeStateDisplay(name, checkWin(mark), _checkTie())
             };
+            console.log('updated')
         }
-        //subscribe to event triggered when player adds a mark
-        PubSub.subscribe('mark-added', _update)
 
         const _restart = function () {
             _board = new Array(9).fill('');
-            //ya displayController.render(_board)
         }
 
-        PubSub.subscribe('game-restart', _restart)
+        PubSub.subscribe('game-start', _restart);
+        //subscribe to event triggered when player adds a mark
+        PubSub.subscribe('mark-added', _update);
 
         const getBoard = () => {
             return _board
@@ -74,7 +72,7 @@ const gameBoard = (
 )();
 
 const popUp = (
-    function(){
+    function () {
         const _popup = document.querySelector('#pop-up');
         const _popupForm = document.querySelector('#form-player-names');
         const _popupButton = document.querySelector('#pop-up-button');
@@ -82,7 +80,7 @@ const popUp = (
         const _visibleArea = document.querySelectorAll('#visible-area');
 
 
-        const _togglePopup = () => { 
+        const _togglePopup = () => {
             _popup.classList.toggle('invisible')
             _visibleArea.forEach((area) => area.classList.toggle('invisible'));
         }
@@ -116,8 +114,9 @@ const popUp = (
                     const player2 = (player2Type == 'human') ?
                         Player(player2Name, 'x') :
                         AIPlayer(player2Name, 'x', player2Type);//add difficulty
+                    
 
-                    PubSub.publish('game-start', {player1, player2})
+                    PubSub.publish('game-start', { player1, player2 })
                     _popupForm.reset();
                 }
             }
@@ -135,15 +134,14 @@ const displayController = (
 
         const _cellListenerFunc = function () {
             //send the cell as a number
-            PubSub.publish('cell-pressed', parseInt(this.getAttribute('data')))
+            PubSub.publish('cell-pressed', this.getAttribute('data'))
         };
 
 
         //restart with button
         _restartButton.addEventListener('click', () => {
             _stateDisplay.style.color = '';
-            //ya game.restart()
-            PubSub.publish('game-restart','');
+            PubSub.publish('game-start', {'player1': game.getPlayer1(), 'cellNum': 9})
         });
 
 
@@ -151,77 +149,71 @@ const displayController = (
             _gameCells.forEach((cell) => {
                 cell.children[0].classList.remove('chosen');
                 cell.classList.remove('chosen');
-                cell.classList.remove('circle')
-           }
+                cell.classList.add('circle');
+            }
             )
         };
 
         //updates DOM
         const _render = function (msg, data) {
             //_render if first player isn't AI.
-                const board = gameBoard.getBoard();
-                const { cellNum } = data;
-                _gameCells.forEach((cell, i) => {
-                    let imagePath
-                    //_render images
-                    if (board[i] == '') {
-                        imagePath = ''
-                        cell.classList.remove('chosen')
-                    } else {
-                        //deactivate cell    
-                        cell.removeEventListener('click', _cellListenerFunc)
-                        imagePath = board[i] == 'x' ?
-                            './images/cross.png' :
-                            './images/circle.png';
+            const board = gameBoard.getBoard();
+            const { cellNum } = data;
+            _gameCells.forEach((cell, i) => {
+                let imagePath
+                //_render images
+                if (board[i] == '') {
+                    imagePath = ''
+                    cell.classList.remove('chosen')
+                } else {
+                    //deactivate cell    
+                    cell.removeEventListener('click', _cellListenerFunc)
+                    imagePath = board[i] == 'x' ?
+                        './images/cross.png' :
+                        './images/circle.png';
 
-                        if (cellNum == i) {
-                            cell.children[0].classList.add('chosen')
-                            cell.classList.add('chosen')
+                    if (cellNum == i) {
+                        cell.children[0].classList.add('chosen')
+                        cell.classList.add('chosen')
                     }
                 };
                 //change img source
                 cell.children[0].setAttribute('src', imagePath);
-            })    
+            })
         };
 
 
         const _changeStateDisplay = function (msg, data) {
             let text
-            if (msg == 'mark-added') {
-            const {name, mark} = data;
-            const win = gameBoard.checkWin(mark);
-            const tie = gameBoard.checkTie();
+            if (msg == 'turn-passed') {
+                const { name, mark, nextPlayer } = data;
+                const win = gameBoard.checkWin(mark);
+                const tie = gameBoard.checkTie();
 
-            
-            //get the other player to post whose turn is next
-            const nextPlayer = game.getPlayer1['name'] == name ?
-                game.getPlayer2() :
-                game.getPlayer1();
-            
-            //change class for div:hover
-            _gameCells.forEach((cell) => cell.classList.toggle('circle'));
+                //change class for div:hover
+                _gameCells.forEach((cell) => cell.classList.toggle('circle'));
 
-            //if the next player is AI
-            if (nextPlayer.hasOwnProperty('addRandom')) {
-                //stop player from choosing for them
-                _gameCells.forEach((cell) => cell.classList.add('chosen'))
-            }
+                //if the next player is AI
+                if (nextPlayer.hasOwnProperty('addRandom')) {
+                    //stop player from choosing for them
+                    _gameCells.forEach((cell) => cell.classList.add('chosen'))
+                }
 
-            if (win) {
-                text = `${name} won!`
-                _stateDisplay.style.color = 'var(--color-complementary2-dark';
-                _deactivateCells();
-            } else if (tie) {
-                _stateDisplay.style.color = 'var(--color-complementary1-dark)';
-                text = `It's a tie!`
+                if (win) {
+                    text = `${name} won!`
+                    _stateDisplay.style.color = 'var(--color-complementary2-dark';
+                    _deactivateCells();
+                    _deactivateHover();
+                } else if (tie) {
+                    _stateDisplay.style.color = 'var(--color-complementary1-dark)';
+                    text = `It's a tie!`
+                } else {
+                    text = `${nextPlayer.getName()}'s turn`
+                }
             } else {
-                text = `${nextPlayer.getName()}'s turn`
+                const player1 = data['player1'];
+                text = `${player1.getName()}'s turn`
             }
-        } else 
-        {
-            console.log(data)
-            text = `${data['player2'].getName()}'s turn` 
-        }
             _stateDisplay.innerText = text;
         };
 
@@ -238,19 +230,19 @@ const displayController = (
         }
 
         const _deactivateHover = () => {
-            _gameCells.forEach( (cell) => cell.classList.add('chosen'))
+            _gameCells.forEach((cell) => cell.classList.add('chosen'))
         }
 
         PubSub.subscribe('mark-added', _render);
-        PubSub.subscribe('mark-added', _changeStateDisplay);
-        PubSub.subscribe('game-start',  _restartCells);
+        PubSub.subscribe('game-start', _restartCells);
         PubSub.subscribe('game-start', _activateCells);
         PubSub.subscribe('game-start', _changeStateDisplay);
         PubSub.subscribe('game-start', _render);
         PubSub.subscribe('ai-turn-start', _deactivateHover);
         PubSub.subscribe('ai-turn-start', _deactivateCells)
         PubSub.subscribe('ai-turn-end', _activateCells);
-        PubSub.subscribe('game-restart', _render)
+
+        PubSub.subscribe('turn-passed', _changeStateDisplay);
 
     })();
 
@@ -259,15 +251,18 @@ const Player = function (name, mark) {
     const _mark = mark;
 
     const addMark = function (cellNum) {//adds a mark on gameBoard
-        PubSub.publish('mark-added', {cellNum, mark:_mark, name})
+        PubSub.publish('mark-added', { cellNum, mark: _mark, name })
     }
 
     const getName = function () {
         return name
     }
 
+    const getMark = function() {
+        return _mark
+    }
 
-    return { addMark, getName }
+    return { addMark, getName, getMark}
 }
 
 const AIPlayer = function (name, mark, difficulty) {
@@ -276,7 +271,9 @@ const AIPlayer = function (name, mark, difficulty) {
     const _AIMark = mark;
 
     const _extractEmptyIndexes = (board) => {
+        // console.log(board)
         const result = board.reduce((acc, cell, i) => {
+            // console.log(cell)
             if (cell === '' || typeof (cell) === 'number') {
                 acc.push(i)
             }
@@ -287,6 +284,7 @@ const AIPlayer = function (name, mark, difficulty) {
 
     //new methods
     const addRandom = () => {
+        console.log('playRandom')
         //check which cells are empty and extract their indexes
         const emptyCellsIndexes = _extractEmptyIndexes(gameBoard.getBoard())
         //choose at random from those indexes
@@ -294,19 +292,18 @@ const AIPlayer = function (name, mark, difficulty) {
             Math.floor(Math.random() * emptyCellsIndexes.length)
         ]
         //add mark there after random delay
-        const randomDelay = (Math.random() * 1000) + 500;
-        setTimeout(() => {
             PubSub.publish('ai-turn-end');
             //ya displayController.activateCells();
             prototype.addMark(randomEmptyIndex)
-        },
-            randomDelay);
+  
     };
 
     const addMiniMax = () => {
+        console.log('playHArd!')
         //Original algorithm implementation by Ahmand ABdolsaheb
         //https://www.freecodecamp.org/news/how-to-make-your-tic-tac-toe-game-unbeatable-by-using-the-minimax-algorithm-9d690bad4b37/
         const _humanMark = mark === 'x' ? '0' : 'x';
+        console.log(gameBoard.getBoard())
 
         const _initialBoard = gameBoard.getBoard().map((x, i) => {
             if (x == '') {
@@ -384,14 +381,11 @@ const AIPlayer = function (name, mark, difficulty) {
         }
 
         const bestMove = miniMax(mark, _initialBoard);
+        console.log(bestMove)
 
-        //add mark there after random delay
-        const randomDelay = (Math.random() * 500) + 500;
-        setTimeout(() => {
             PubSub.publish('ai-turn-end');
             //ya displayController.activateCells();
-            prototype.addMark(bestMove.index)
-        }, randomDelay);
+            prototype.addMark(bestMove.index);
     };
 
     const getDifficulty = () => {
@@ -406,30 +400,26 @@ const game = (function () {
     let _player1;
     let _player2;
 
-    const getPlayer1 = function() {
+    const getPlayer1 = function () {
         return _player1
     }
 
-    const getPlayer2 = function() {
+    const getPlayer2 = function () {
         return _player2
     }
 
-    const _start = function(msg, data) {
+    const _start = function (msg, data) {
+        counter = 0;
         //when restarting, leave same players
         _player1 = data['player1'] ? data['player1'] : _player1;
         _player2 = data['player2'] ? data['player2'] : _player2;
-        counter = 0;
-        //ya displayController.restartCells();
-        //ya displayController.changeStateDisplay(this.player2.getName())
-        //ya displayController.activateCells();
         //if the first player is AI make it play
-        _playAI(_player1);
-        //no! if(!_player1.hasOwnProperty('addRandom')){
-        // displayController.render(gameBoard.getBoard())
-        // }
+        _playAI(_player1, _player2);
     };
 
-    PubSub.subscribe('game-start', _start);
+    const _publishTurnPassed = function(name, mark, nextPlayer){
+        PubSub.publish('turn-passed', {name, mark, nextPlayer})
+}
 
     //plays a turn
     const _turn = function (msg, data) {
@@ -437,42 +427,42 @@ const game = (function () {
         //alternate turns between players
         if (counter % 2 == 0) {
             _player1.addMark(cellNum);
+            _publishTurnPassed(_player1.getName(), _player1.getMark(), _player2);
             counter++
             //check if player2 is AI
-            _playAI(_player2)
+            _playAI(_player2, _player1)
         } else {
             _player2.addMark(cellNum);
+            _publishTurnPassed(_player2.getName(), _player2.getMark(), _player1);
             counter++
             //check if player1 is AI
-            _playAI(_player1)
+            _playAI(_player1, _player2)
 
-        }
-        
+        };
     }
 
-    PubSub.subscribe('cell-pressed', _turn)
+  
 
-    const _playAI = function (player) {
+    const _playAI = function (player, nextPlayer) {
         //check if player is AI
         if (player.hasOwnProperty('addRandom') && !gameBoard.checkWin('x') && !gameBoard.checkWin('0')) {
-            if (counter == 0) {
-                console.log('startai')
-                //ya displayController.deactivateHover();
-                PubSub.publish('ai-turn-start', '')
-            }
-            //sends the current board so that AI can choose from empty cells
+            PubSub.publish('ai-turn-start', '');
+            _publishTurnPassed(player.getName(), player.getMark(), nextPlayer)
+            //delay allows for board to update, needed for lookup in addMiniMax
+            const randomDelay = (Math.random() * 1000) + 500;
             if (player.getDifficulty() == 'hard') {
-                player.addMiniMax();
+                setTimeout(()=> player.addMiniMax(), randomDelay);
             } else { //if it's easy difficulty
-                player.addRandom()
+                setTimeOut(()=> player.addRandom(), randomDelay);
             }
             counter++
         }
     }
 
-    PubSub.subscribe('game-restart', _start)
+    PubSub.subscribe('game-start', _start);
+    PubSub.subscribe('cell-pressed', _turn);
 
-    return {getPlayer1, getPlayer2 }
+    return { getPlayer1, getPlayer2 }
 }
 )()
 
