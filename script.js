@@ -77,10 +77,12 @@ const popUp = (
         const _popupButton = document.querySelector('#pop-up-button');
         const _choosePlayersButton = document.querySelector('#choose-players-button');
         const _visibleArea = document.querySelectorAll('#visible-area');
+        const _stateDisplay = document.querySelector('#state-display');
 
 
         const _togglePopup = () => {
-            _popup.classList.toggle('invisible')
+            _stateDisplay.style.color = '';
+            _popup.classList.toggle('invisible');
             _visibleArea.forEach((area) => area.classList.toggle('invisible'));
         }
 
@@ -114,8 +116,7 @@ const popUp = (
                         Player(player2Name, 'x') :
                         AIPlayer(player2Name, 'x', player2Type);//add difficulty
 
-
-                    PubSub.publish('game-start', { player1, player2 })
+                    PubSub.publish('game-start', { player1, player2 });
                     _popupForm.reset();
                 }
             }
@@ -133,7 +134,7 @@ const displayController = (
 
         const _cellListenerFunc = function () {
             //send the cell as a number
-            PubSub.publish('cell-pressed', this.getAttribute('data'))
+            PubSub.publish('cell-pressed', this.getAttribute('data'));
         };
 
 
@@ -436,22 +437,27 @@ const game = (function () {
 
 
     const _playAI = function (player, nextPlayer) {
-        const randomDelay = (Math.random() * 1000) + 500;
-        PubSub.publish('ai-turn-start', '');
-        //delay allows for board to update, 
-        //needed for lookup in addMiniMax and for checkWins
-        setTimeout( () => {
-        //check if player is AI
+
         if (player.hasOwnProperty('addRandom') && !gameBoard.checkWin('x') && !gameBoard.checkWin('0')) {
-            if (player.getDifficulty() == 'hard') {
+
+            PubSub.publish('ai-turn-start', '');
+
+            //delay allows for board to update, 
+            const randomDelay = (Math.random() * 1000) + 500;
+            //needed for lookup in addMiniMax and for checkWins
+            setTimeout(() => {
+                //check if player is AI
+
+                if (player.getDifficulty() == 'hard') {
                     player.addMiniMax();
-            } else { //if it's easy difficulty
+                } else { //if it's easy difficulty
                     player.addRandom()
-            }
-            _publishTurnPassed(player.getName(), player.getMark(), nextPlayer)
-            counter++
-        }
-    })
+                }
+                _publishTurnPassed(player.getName(), player.getMark(), nextPlayer);
+                counter++
+            }, randomDelay
+            )
+    }
     }
 
     PubSub.subscribe('game-start', _start);
