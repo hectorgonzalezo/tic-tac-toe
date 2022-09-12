@@ -144,19 +144,14 @@ main h1 {
 }
 
 #visible-area.invisible{
-    background-color: red;
-    opacity: 0;
     -webkit-animation: fadeOut 0s;
     animation: fadeOut 0s; 
-    /* z-index: 2; */
     display: none;
 }
 
 #pop-up.invisible {
-    opacity: 0;
     -webkit-animation: fadeOut 1s;
     animation: fadeOut 1s;
-    /* z-index: 2; */
     display: none;
 }
 
@@ -177,7 +172,6 @@ main h1 {
     width: 500px;
     height: 500px;
     background-color: var(--color-dark);
-    /* background-color: black; */
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
