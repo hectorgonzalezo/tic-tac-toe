@@ -47,12 +47,15 @@ const gameBoard = (
         }
 
         const _update = function (msg, data) {
+
             //extract data from PubSub
             const { cellNum, mark } = data;
-
-            if (_board[cellNum] == '') {//don't update if cell has already been played
+            //don't update if cell has already been played
+            if (!checkWin("x") && !checkWin("0")) {
+              if (_board[cellNum] == "") {
                 _board[cellNum] = mark;
-            };
+              }
+            }
         }
 
         const _restart = function () {
@@ -437,27 +440,27 @@ const game = (function () {
 
 
     const _playAI = function (player, nextPlayer) {
-
-        if (player.hasOwnProperty('addRandom') && !gameBoard.checkWin('x') && !gameBoard.checkWin('0')) {
-
-            PubSub.publish('ai-turn-start', '');
-
-            //delay allows for board to update, 
-            const randomDelay = (Math.random() * 1000) + 500;
-            //needed for lookup in addMiniMax and for checkWins
-            setTimeout(() => {
-                //check if player is AI
-
-                if (player.getDifficulty() == 'hard') {
-                    player.addMiniMax();
-                } else { //if it's easy difficulty
-                    player.addRandom()
+        //delay allows for board to update, 
+        const randomDelay = (Math.random() * 1000) + 1000;
+        setTimeout(() => {
+            if (player.hasOwnProperty('addRandom') && !gameBoard.checkWin('x') && !gameBoard.checkWin('0')) {
+                console.log(gameBoard.getBoard())
+    
+                PubSub.publish('ai-turn-start', '');
+    
+                //needed for lookup in addMiniMax and for checkWins
+                    //check if player is AI
+    
+                    if (player.getDifficulty() == 'hard') {
+                        player.addMiniMax();
+                    } else { //if it's easy difficulty
+                        player.addRandom()
+                    }
+                    _publishTurnPassed(player.getName(), player.getMark(), nextPlayer);
+                    counter++
                 }
-                _publishTurnPassed(player.getName(), player.getMark(), nextPlayer);
-                counter++
-            }, randomDelay
-            )
-    }
+        }, randomDelay)
+
     }
 
     PubSub.subscribe('game-start', _start);
