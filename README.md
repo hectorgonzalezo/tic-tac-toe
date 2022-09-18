@@ -8,7 +8,7 @@ I made it to practice organizing Javascript code by using factory functions and 
 
 It can be played against another human, or two types of AIs. The first chooses a play at random, while the second uses the Minimax algorithm to be basically unbeatable.
 
-Build as part of [The Odin Project](https://www.theodinproject.com/) curriculum.
+Built as part of [The Odin Project](https://www.theodinproject.com/) curriculum.
 
 ## Live Preview
 [https://hectorgonzalezo.github.io/tic-tac-toe/](https://hectorgonzalezo.github.io/tic-tac-toe/)
